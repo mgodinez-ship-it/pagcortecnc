@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { useState } from 'react';
+import { projectId, publicAnonKey } from '/utils/supabase/info';
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -9,13 +10,40 @@ export function Contact() {
     phone: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de envío del formulario
-    console.log('Formulario enviado:', formData);
-    alert('¡Gracias por tu mensaje! Nos pondremos en contacto pronto.');
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-e97ce334/contact`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`
+          },
+          body: JSON.stringify(formData)
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('¡Gracias por tu mensaje! Te contactaremos pronto a ventas@sgp.com.mx');
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      } else {
+        console.error('Error al enviar el formulario:', data);
+        alert('Hubo un error al enviar el mensaje. Por favor, intenta nuevamente o contáctanos directamente a ventas@sgp.com.mx');
+      }
+    } catch (error) {
+      console.error('Error de conexión:', error);
+      alert('Error de conexión. Por favor, verifica tu internet e intenta nuevamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -26,10 +54,10 @@ export function Contact() {
   };
 
   const contactInfo = [
-    {
+     {
       icon: Phone,
       title: 'Teléfono',
-      content: '+52 5547937579',
+      content: '+52 5571590456',
       link: 'https://wa.me/525547937579?text=Hola,%20vengo%20desde%20su%20página%20web'
     },
     {
@@ -151,10 +179,13 @@ export function Contact() {
 
               <button
                 type="submit"
-                className="w-full px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 shadow-lg shadow-cyan-500/50 flex items-center justify-center gap-2"
+                className="w-full px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 shadow-lg shadow-cyan-500/50 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
               >
-                <span className="font-semibold">Enviar mensaje</span>
-                <Send size={20} />
+                <span className="font-semibold">
+                  {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}
+                </span>
+                {!isSubmitting && <Send size={20} />}
               </button>
             </form>
           </motion.div>

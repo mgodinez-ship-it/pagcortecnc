@@ -24,7 +24,7 @@ export function Navbar() {
             <ImageWithFallback
               src="https://i.ibb.co/8gMT40CL/928046a3-81ac-40dd-a28d-106f46b7c608-1.png"
               alt="Logo"
-              className="h-12 w-auto object-contain"
+              className="h-16 w-auto object-contain drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]"
             />
           </div>
 
